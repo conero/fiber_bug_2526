@@ -22,10 +22,6 @@ var embedDirStatic embed.FS
 func main() {
 	app := fiber.New()
 
-	app.Use("/", filesystem.New(filesystem.Config{
-		Root: http.FS(f),
-	}))
-
 	// Access file "image.png" under `assets/` directory via URL: `http://<server>/assets/image.png`.
 	// Without `PathPrefix`, you have to access it via URL:
 	// `http://<server>/assets/assets/image.png`.
@@ -34,6 +30,10 @@ func main() {
 		PathPrefix: "assets",
 		Browse:     true,
 	}))
+
+	app.Use("*", func(ctx *fiber.Ctx) error {
+		return filesystem.SendFile(ctx, http.FS(f), "index.html")
+	})
 
 	log.Fatal(app.Listen(":3023"))
 }
